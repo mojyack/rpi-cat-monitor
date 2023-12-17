@@ -8,6 +8,7 @@ import RPi.GPIO as gpio
 from hx711 import HX711
 
 import config
+import remote
 
 def take_photo():
     filename = datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " " + daemon_id + ".jpg"
@@ -52,6 +53,9 @@ if config.debug:
 
 signal_sent_at = None
 
+remote.init()
+remote.start(config.bot_token)
+
 try:
     while True:
         val = hx.get_weight(1)
@@ -59,7 +63,13 @@ try:
         hx.power_up()
 
         if config.debug:
-            print(val)
+            if signal_sent_at != None:
+                now = time.time()
+                rem = config.reset_timeout - (now - signal_sent_at)
+                print(f"(reactivate in {rem} secs)", int(val))
+            else:
+                print(val)
+
         detected = val >= config.load_threshold
         if detected:
             if signal_sent_at == None:
@@ -75,6 +85,7 @@ try:
                 if config.debug:
                     print(payload)
                 # send_json(json)
+                remote.send_message(config.channel_id, "Cat detected!", [config.tmpdir + "/" + p for p in pictures])
             signal_sent_at = time.time()
         elif signal_sent_at != None:
             now = time.time()
@@ -87,4 +98,5 @@ try:
 except (KeyboardInterrupt, SystemExit):
     print("bye!")
     gpio.cleanup()
+    remote.stop()
 
