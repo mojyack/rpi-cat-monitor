@@ -2,6 +2,11 @@
 A cat monitor script using rpi zero w and hx711  
 hx711.py is from https://github.com/tatobari/hx711py
 
+# setup
+```
+pip3 install -t lib discord
+```
+
 # references
 - raspberry piとhx711を使った重量測定器(TkinterでGUI表示)  
 https://qiita.com/todateman/items/9fb3c251a1eb720efab1
